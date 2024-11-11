@@ -1,0 +1,85 @@
+describe('Teste de Login, Cadastro de Cliente e Agendamento de Sessão no PsicoManager', () => {
+    const nomeCliente = `Cliente ${Math.floor(Math.random() * 1000)}`;
+    const grupoCliente = `Grupo ${Math.floor(Math.random() * 100)}`;
+  
+    it('Deve realizar login com sucesso e redirecionar para a página inicial', () => {
+      // Acessar a URL de login
+      cy.visit('https://app2.psicomanager.com/login');
+      
+      // Inserir o email
+      cy.get('input[name="email"]').type('anneauto16@outlook.com');
+      
+      // Inserir a senha
+      cy.get('input[name="password"]').type('Abcd123%');
+      
+      // Clicar no botão de entrar
+      cy.get('button[type="submit"]').click();
+      
+      // Verificar o redirecionamento para a página inicial
+      cy.url().should('include', '/dashboard');
+      cy.contains('Bem-vindo');
+    });
+  
+    it('Deve cadastrar um cliente com dados randômicos e exibir mensagem de confirmação', () => {
+      // Acessar a página de clientes
+      cy.get('a[href="/clientes"]').click();
+      
+      // Navegar até a seção de "Cadastrar Cliente"
+      cy.contains('Cadastrar Cliente').click();
+      
+      // Preencher os campos obrigatórios com dados randômicos
+      cy.get('input[name="nome"]').type(nomeCliente);
+      cy.get('input[name="profissional"]').type('Profissional Teste');
+      cy.get('select[name="grupo"]').select(grupoCliente);
+      cy.get('select[name="plano_financeiro"]').select('Plano A');
+      
+      // Clicar no botão para cadastrar o cliente
+      cy.get('button[type="submit"]').click();
+      
+      // Verificar se a mensagem de confirmação foi exibida
+      cy.contains('Cliente cadastrado com sucesso');
+    });
+  
+    it('Deve agendar uma nova sessão para o paciente recém-cadastrado', () => {
+      // Acessar a seção de "Listar Clientes"
+      cy.get('a[href="/clientes"]').click();
+      
+      // Selecionar o paciente recém-cadastrado
+      cy.contains(nomeCliente).click();
+      
+      // Navegar até a seção "Sessões"
+      cy.get('a[href="/sessoes"]').click();
+      
+      // Clicar em "Agendar Novo Horário"
+      cy.contains('Agendar Novo Horário').click();
+      
+      // Preencher a data com o dia de hoje
+      const today = new Date().toISOString().slice(0, 10);
+      cy.get('input[name="data"]').type(today);
+      
+      // Preencher o horário com um horário randômico entre 06:00 e 22:00
+      const randomHour = Math.floor(Math.random() * (22 - 6 + 1)) + 6;
+      const horario = `${randomHour}:00`;
+      cy.get('input[name="horario"]').type(horario);
+      
+      // Definir a recorrência como semanal
+      cy.get('select[name="recorrencia"]').select('Semanal');
+      
+      // Clicar em "Salvar"
+      cy.get('button[type="submit"]').click();
+      
+      // Verificar se a mensagem de confirmação foi exibida
+      cy.contains('Sessão agendada com sucesso');
+    });
+  });
+
+  // Sugestão de melhorias:
+  //1- Poderia ter uma opção para o sistema para validar se o usuario clicou no modal de avaliação 
+  //do site após iniciar o login
+  //2- Também seria interessante após o login antes de cadastrar um novo cliente que houvesse uma verificação
+  // no buscador de clientes para que o usuario verificasse se não estaria cadastrando um cliente que já estava no
+  // no banco de dados do sistema( é possível cadastrar usuario duplicados?) e também, ao efetuar o cadastro
+  // são aceitos caracteres especiais nos inputs digitaveis?, nos inputs de data ou integer são aceitos somente numeros?
+  // 3 - Caso o cliente esqueça a senha ou digite a senha incorreta por exemplo mais de 3 vezes é éxibido uma mensagem de aviso para evitar
+  // bloqueio de cadastro?
+  
